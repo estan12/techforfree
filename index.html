@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechForFree - Tech & Computer Store</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for Admin Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              400: '#38bdf8',
+              500: '#06b6d4',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            },
+            dark: {
+              bg: '#090d16',
+              card: '#111827',
+              border: '#1f2937',
+              hover: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #090d16;
+      color: #f3f4f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2937;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+
+    .neon-glow {
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+    }
+    .neon-border {
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .glass-nav {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+    }
+    .modal-backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-black">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 glass-nav border-b border-dark-border transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo -->
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchView('store')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-brand-500/20">
+            <i class="fa-solid font-bold fa-microchip"></i>
+          </div>
+          <div>
+            <span id="header-store-name" class="text-2xl font-black tracking-tight text-white">
+              TechForFree<span class="text-brand-400">.</span>
+            </span>
+            <span id="mode-badge" class="ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              STOREFRONT
+            </span>
+          </div>
+        </div>
+
+        <!-- Global Search Bar (Storefront View) -->
+        <div id="nav-search-container" class="hidden md:flex flex-1 max-w-md mx-8 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearch()"
+            placeholder="Search GPUs, Gaming Laptops, Keyboards..." 
+            class="w-full bg-dark-card border border-dark-border rounded-xl pl-11 pr-4 py-2.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-brand-400 transition"
+          >
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex items-center gap-3">
+          <!-- Cart Button -->
+          <button 
+            id="cart-toggle-btn"
+            onclick="toggleCartDrawer(true)"
+            class="relative bg-dark-card hover:bg-dark-hover border border-dark-border text-gray-200 p-2.5 rounded-xl transition flex items-center gap-2"
+          >
+            <i class="fa-solid fa-cart-shopping text-brand-400"></i>
+            <span class="hidden sm:inline font-semibold text-sm">Cart</span>
+            <span id="cart-badge" class="bg-brand-500 text-black text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              0
+            </span>
+          </button>
+
+          <!-- Admin Mode Toggle Button -->
+          <button 
+            id="admin-toggle-btn"
+            onclick="toggleAdminView()"
+            class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition shadow-lg shadow-indigo-500/20 flex items-center gap-2"
+          >
+            <i id="admin-toggle-icon" class="fa-solid fa-sliders"></i>
+            <span id="admin-toggle-text">Admin Panel</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-grow">
+
+    <!-- ========================================== -->
+    <!-- STOREFRONT VIEW -->
+    <!-- ========================================== -->
+    <div id="storefront-view" class="space-y-8 pb-16">
+      
+      <!-- Hero Banner -->
+      <section class="relative overflow-hidden bg-gradient-to-b from-dark-card to-dark-bg border-b border-dark-border py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div class="space-y-4 max-w-2xl text-center md:text-left">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              <i class="fa-solid fa-bolt"></i> Premium Hardware Supplier
+            </span>
+            <h1 id="banner-hero-title" class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              Next-Gen Tech & High Performance PC Gear
+            </h1>
+            <p id="banner-hero-subtitle" class="text-gray-400 text-base sm:text-lg">
+              Upgrade your rig with cutting-edge GPUs, mechanical keyboards, ultra-fast NVMe SSDs, and gaming monitors.
+            </p>
+            <div class="pt-2 flex flex-wrap gap-3 justify-center md:justify-start">
+              <button onclick="scrollToProducts()" class="bg-brand-500 hover:bg-brand-400 text-black font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-brand-500/25">
+                Explore Catalog <i class="fa-solid fa-arrow-right ml-1"></i>
+              </button>
+              <div class="flex items-center gap-2 text-xs text-gray-400 px-4 py-3 bg-dark-card border border-dark-border rounded-xl">
+                <i class="fa-solid fa-truck-fast text-brand-400"></i> Free Express Shipping
+              </div>
+            </div>
+          </div>
+          <!-- Hero Banner Graphic / Display Card -->
+          <div class="relative w-full max-w-sm md:max-w-md">
+            <div class="absolute -inset-1 rounded-2xl bg-gradient-to-r from-brand-500 to-indigo-600 opacity-30 blur-lg"></div>
+            <div class="relative bg-dark-card border border-dark-border rounded-2xl p-5 space-y-4">
+              <img src="https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=800&auto=format&fit=crop&q=80" alt="Featured PC" class="w-full h-48 object-cover rounded-xl">
+              <div class="flex justify-between items-center">
+                <div>
+                  <span class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Featured Specs</span>
+                  <h3 class="text-white font-bold">RTX 4090 OC Gaming Rig</h3>
+                </div>
+                <span class="text-lg font-bold text-brand-400">$1,899.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Store Catalog Section -->
+      <section id="catalog-section" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        
+        <!-- Filters & Category Navigation Bar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-dark-card p-4 rounded-2xl border border-dark-border">
+          
+          <!-- Categories Tabs -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0" id="category-tabs">
+            <button onclick="filterCategory('All')" class="cat-tab-btn active font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-brand-500 text-black">
+              All Products
+            </button>
+            <button onclick="filterCategory('Graphics Cards')" class="cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover">
+              Graphics Cards
+            </button>
+            <button onclick="filterCategory('Laptops')" class="cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover">
+              Laptops
+            </button>
+            <button onclick="filterCategory('Keyboards')" class="cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover">
+              Keyboards
+            </button>
+            <button onclick="filterCategory('Storage')" class="cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover">
+              Storage
+            </button>
+            <button onclick="filterCategory('Monitors')" class="cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover">
+              Monitors
+            </button>
+          </div>
+
+          <!-- Price Range & Sorting Filter Controls -->
+          <div class="flex items-center gap-4 border-t lg:border-t-0 border-dark-border pt-3 lg:pt-0">
+            <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+              <span>Max Price:</span>
+              <input type="range" id="price-range" min="0" max="3000" step="50" value="3000" oninput="updatePriceFilter(this.value)" class="w-28 sm:w-36 accent-brand-400">
+              <span id="price-range-val" class="font-bold text-white w-14">$3000</span>
+            </div>
+
+            <select id="sort-select" onchange="renderProducts()" class="bg-dark-bg text-gray-200 text-xs sm:text-sm border border-dark-border rounded-xl px-3 py-2 focus:outline-none">
+              <option value="featured">Featured</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="name">Name (A-Z)</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Product Grid Container -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- Dynamically Populated by JavaScript -->
+        </div>
+
+        <!-- Empty State for Products -->
+        <div id="no-products-msg" class="hidden text-center py-16 bg-dark-card rounded-2xl border border-dark-border">
+          <i class="fa-solid fa-box-open text-5xl text-gray-600 mb-4"></i>
+          <h3 class="text-xl font-bold text-white">No products found</h3>
+          <p class="text-gray-400 text-sm mt-1">Try resetting your filters or search query.</p>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ADMIN CONTROL PANEL VIEW -->
+    <!-- ========================================== -->
+    <div id="admin-view" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      
+      <!-- Admin Header Banner -->
+      <div class="bg-dark-card border border-dark-border p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold text-purple-400 mb-1">
+            <i class="fa-solid fa-shield-halved"></i> MANAGEMENT CONSOLE
+          </div>
+          <h2 class="text-2xl font-extrabold text-white">Store Control Dashboard</h2>
+          <p class="text-gray-400 text-sm">Manage inventory, monitor real-time sales, update site configuration, and track orders.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="resetDefaultData()" class="bg-dark-bg hover:bg-dark-hover border border-red-500/30 text-red-400 font-medium text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Reset Demo Data
+          </button>
+          <button onclick="switchView('store')" class="bg-brand-500 hover:bg-brand-400 text-black font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
+            <i class="fa-solid fa-store mr-1"></i> View Live Store
+          </button>
+        </div>
+      </div>
+
+      <!-- Key Analytics Metrics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase">Total Revenue</p>
+            <h3 id="stat-revenue" class="text-2xl font-extrabold text-white mt-1">$0.00</h3>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-dollar-sign"></i>
+          </div>
+        </div>
+
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase">Total Orders</p>
+            <h3 id="stat-orders" class="text-2xl font-extrabold text-white mt-1">0</h3>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-bag-shopping"></i>
+          </div>
+        </div>
+
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase">Catalog Items</p>
+            <h3 id="stat-products" class="text-2xl font-extrabold text-white mt-1">0</h3>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-boxes-stacked"></i>
+          </div>
+        </div>
+
+        <div class="bg-dark-card border border-dark-border p-5 rounded-2xl flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-semibold uppercase">Low Stock Alerts</p>
+            <h3 id="stat-low-stock" class="text-2xl font-extrabold text-amber-400 mt-1">0</h3>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Navigation Tabs -->
+      <div class="flex border-b border-dark-border space-x-6">
+        <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" class="pb-3 font-bold text-sm text-brand-400 border-b-2 border-brand-400">
+          <i class="fa-solid fa-boxes-packing mr-1"></i> Inventory Management
+        </button>
+        <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="pb-3 font-bold text-sm text-gray-400 border-b-2 border-transparent hover:text-white">
+          <i class="fa-solid fa-receipt mr-1"></i> Orders & Sales
+        </button>
+        <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="pb-3 font-bold text-sm text-gray-400 border-b-2 border-transparent hover:text-white">
+          <i class="fa-solid fa-gear mr-1"></i> Store Settings
+        </button>
+      </div>
+
+      <!-- ADMIN TAB 1: INVENTORY MANAGEMENT -->
+      <div id="admin-tab-inventory" class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 class="text-xl font-bold text-white">Product Catalog Management</h3>
+          <button onclick="openProductModal()" class="bg-brand-500 hover:bg-brand-400 text-black font-bold px-4 py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus"></i> Add New Product
+          </button>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-300">
+              <thead class="bg-dark-bg text-xs font-semibold uppercase text-gray-400 border-b border-dark-border">
+                <tr>
+                  <th class="p-4">Product</th>
+                  <th class="p-4">Category</th>
+                  <th class="p-4">Price</th>
+                  <th class="p-4">Stock</th>
+                  <th class="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body" class="divide-y divide-dark-border">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 2: ORDERS & SALES -->
+      <div id="admin-tab-orders" class="hidden space-y-6">
+        <h3 class="text-xl font-bold text-white">Customer Orders & Sales Log</h3>
+        
+        <div class="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-300">
+              <thead class="bg-dark-bg text-xs font-semibold uppercase text-gray-400 border-b border-dark-border">
+                <tr>
+                  <th class="p-4">Order ID</th>
+                  <th class="p-4">Customer</th>
+                  <th class="p-4">Items</th>
+                  <th class="p-4">Total</th>
+                  <th class="p-4">Status</th>
+                  <th class="p-4 text-right">Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body" class="divide-y divide-dark-border">
+                <!-- Dynamically Rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN TAB 3: STORE SETTINGS -->
+      <div id="admin-tab-settings" class="hidden space-y-6">
+        <h3 class="text-xl font-bold text-white">Live Branding & Promo Customization</h3>
+        
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 max-w-2xl space-y-5">
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Store Display Name</label>
+            <input type="text" id="setting-store-name" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:border-brand-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Hero Banner Heading</label>
+            <input type="text" id="setting-hero-title" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:border-brand-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Hero Banner Subtitle</label>
+            <textarea id="setting-hero-subtitle" rows="2" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:border-brand-400 focus:outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-gray-400 mb-2">Active Promo Code</label>
+            <div class="flex gap-3">
+              <input type="text" id="setting-promo-code" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:border-brand-400 focus:outline-none" placeholder="e.g. TECH20">
+              <input type="number" id="setting-promo-discount" class="w-32 bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:border-brand-400 focus:outline-none" placeholder="% Off" min="1" max="100">
+            </div>
+          </div>
+
+          <button onclick="saveStoreSettings()" class="bg-brand-500 hover:bg-brand-400 text-black font-bold px-6 py-3 rounded-xl transition">
+            Save Settings Changes
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODALS & DRAWERS -->
+  <!-- ========================================== -->
+
+  <!-- Cart Drawer Overlay -->
+  <div id="cart-drawer" class="fixed inset-0 z-50 invisible opacity-0 transition-all duration-300">
+    <div class="absolute inset-0 modal-backdrop" onclick="toggleCartDrawer(false)"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-dark-card border-l border-dark-border shadow-2xl flex flex-col justify-between p-6">
+      
+      <!-- Cart Header -->
+      <div>
+        <div class="flex items-center justify-between border-b border-dark-border pb-4">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cart-shopping text-brand-400 text-xl"></i>
+            <h3 class="text-xl font-bold text-white">Your Shopping Cart</h3>
+          </div>
+          <button onclick="toggleCartDrawer(false)" class="text-gray-400 hover:text-white p-2">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cart-items-container" class="mt-4 space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+          <!-- Dynamically Rendered -->
+        </div>
+      </div>
+
+      <!-- Cart Summary & Checkout Controls -->
+      <div class="border-t border-dark-border pt-4 space-y-4">
+        <!-- Promo Code Section -->
+        <div class="flex gap-2">
+          <input type="text" id="promo-input" placeholder="Promo code (e.g. TECH20)" class="flex-1 bg-dark-bg border border-dark-border rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-400">
+          <button onclick="applyPromoCode()" class="bg-dark-hover hover:bg-gray-800 border border-dark-border text-white text-xs font-bold px-4 py-2 rounded-xl transition">
+            Apply
+          </button>
+        </div>
+        <div id="promo-status-msg" class="text-xs text-brand-400 font-semibold hidden"></div>
+
+        <!-- Totals breakdown -->
+        <div class="space-y-1.5 text-sm">
+          <div class="flex justify-between text-gray-400">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">$0.00</span>
+          </div>
+          <div class="flex justify-between text-brand-400 font-semibold hidden" id="discount-row">
+            <span>Discount</span>
+            <span id="cart-discount">-$0.00</span>
+          </div>
+          <div class="flex justify-between text-gray-400">
+            <span>Shipping</span>
+            <span class="text-emerald-400 font-medium">FREE</span>
+          </div>
+          <div class="flex justify-between text-lg font-bold text-white border-t border-dark-border pt-2">
+            <span>Total</span>
+            <span id="cart-total" class="text-brand-400">$0.00</span>
+          </div>
+        </div>
+
+        <button onclick="processCheckout()" class="w-full bg-brand-500 hover:bg-brand-400 text-black font-extrabold py-3.5 rounded-xl transition shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+          <span>Checkout Order</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div id="product-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-dark-card border border-dark-border rounded-2xl max-w-2xl w-full p-6 relative space-y-6 overflow-hidden">
+      <button onclick="closeProductModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white p-2">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <img id="modal-product-img" src="" alt="" class="w-full h-64 object-cover rounded-xl border border-dark-border">
+        
+        <div class="space-y-4">
+          <span id="modal-product-cat" class="text-xs font-bold text-brand-400 uppercase tracking-wider bg-brand-500/10 px-2.5 py-1 rounded-full border border-brand-500/20">
+            Category
+          </span>
+          <h2 id="modal-product-title" class="text-2xl font-bold text-white">Product Name</h2>
+          <p id="modal-product-desc" class="text-gray-400 text-sm leading-relaxed">Product description...</p>
+          
+          <div class="flex items-center justify-between pt-2">
+            <div>
+              <span class="text-xs text-gray-500 block">Price</span>
+              <span id="modal-product-price" class="text-2xl font-black text-brand-400">$0.00</span>
+            </div>
+            <div>
+              <span class="text-xs text-gray-500 block">Availability</span>
+              <span id="modal-product-stock" class="text-sm font-semibold text-emerald-400">In Stock</span>
+            </div>
+          </div>
+
+          <button id="modal-add-cart-btn" onclick="" class="w-full bg-brand-500 hover:bg-brand-400 text-black font-bold py-3 rounded-xl transition mt-4">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Product Add / Edit Modal -->
+  <div id="admin-product-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-dark-card border border-dark-border rounded-2xl max-w-lg w-full p-6 relative space-y-4">
+      <div class="flex justify-between items-center border-b border-dark-border pb-3">
+        <h3 id="admin-modal-title" class="text-lg font-bold text-white">Add New Product</h3>
+        <button onclick="closeAdminProductModal()" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <form id="product-form" onsubmit="handleProductFormSubmit(event)" class="space-y-3">
+        <input type="hidden" id="form-product-id">
+        
+        <div>
+          <label class="block text-xs font-semibold text-gray-400 mb-1">Product Title</label>
+          <input type="text" id="form-title" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Category</label>
+            <select id="form-category" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400">
+              <option value="Graphics Cards">Graphics Cards</option>
+              <option value="Laptops">Laptops</option>
+              <option value="Keyboards">Keyboards</option>
+              <option value="Storage">Storage</option>
+              <option value="Monitors">Monitors</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Price ($)</label>
+            <input type="number" step="0.01" id="form-price" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Stock Count</label>
+            <input type="number" id="form-stock" required min="0" class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Image URL</label>
+            <input type="url" id="form-image" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-400 mb-1">Description</label>
+          <textarea id="form-desc" rows="3" required class="w-full bg-dark-bg border border-dark-border rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-brand-400"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-500 hover:bg-brand-400 text-black font-bold py-3 rounded-xl transition pt-3">
+          Save Product
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Receipt Modal -->
+  <div id="receipt-modal" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-dark-card border border-dark-border rounded-2xl max-w-md w-full p-6 text-center space-y-4">
+      <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-emerald-500/30">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      
+      <h3 class="text-2xl font-extrabold text-white">Order Confirmed!</h3>
+      <p class="text-gray-400 text-sm">Thank you for shopping at TechForFree. Your order has been placed successfully.</p>
+      
+      <div class="bg-dark-bg border border-dark-border rounded-xl p-4 text-left text-xs space-y-2">
+        <div class="flex justify-between">
+          <span class="text-gray-500">Order ID:</span>
+          <span id="receipt-order-id" class="font-mono font-bold text-brand-400">#000000</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Total Paid:</span>
+          <span id="receipt-total" class="font-bold text-white">$0.00</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Status:</span>
+          <span class="text-emerald-400 font-semibold">Processing</span>
+        </div>
+      </div>
+
+      <button onclick="closeReceiptModal()" class="w-full bg-brand-500 hover:bg-brand-400 text-black font-bold py-3 rounded-xl transition">
+        Continue Shopping
+      </button>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-brand-500 text-black font-bold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none">
+    <i class="fa-solid fa-circle-info"></i>
+    <span id="toast-message">Notification message</span>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // Initial Seed Data
+    const defaultProducts = [
+      {
+        id: 1,
+        title: "NVIDIA GeForce RTX 4080 Super",
+        category: "Graphics Cards",
+        price: 999.99,
+        stock: 12,
+        image: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=800&auto=format&fit=crop&q=80",
+        description: "Experience ultra-high performance gaming and AI-accelerated graphics with DLSS 3 and 16GB GDDR6X VRAM."
+      },
+      {
+        id: 2,
+        title: "ROG Strix SCAR 17 Gaming Laptop",
+        category: "Laptops",
+        price: 2499.99,
+        stock: 5,
+        image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80",
+        description: "Powered by AMD Ryzen 9 7945HX and RTX 4090 laptop GPU. Features 240Hz QHD display and 32GB DDR5 RAM."
+      },
+      {
+        id: 3,
+        title: "Custom Mechanical RGB Keyboard",
+        category: "Keyboards",
+        price: 139.99,
+        stock: 25,
+        image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80",
+        description: "Hot-swappable tactile switches, per-key RGB backlighting, aluminum top frame, and sound-dampening foam."
+      },
+      {
+        id: 4,
+        title: "Samsung 990 PRO 2TB NVMe SSD",
+        category: "Storage",
+        price: 179.99,
+        stock: 40,
+        image: "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=800&auto=format&fit=crop&q=80",
+        description: "Blazing fast PCIe Gen 4 speeds up to 7450 MB/s read time. Perfect for gaming rigs and heavy workstation workloads."
+      },
+      {
+        id: 5,
+        title: "34-inch Curved OLED Gaming Monitor",
+        category: "Monitors",
+        price: 899.99,
+        stock: 8,
+        image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80",
+        description: "175Hz refresh rate, 0.03ms response time, Quantum Dot OLED display with immersive 1800R curvature."
+      },
+      {
+        id: 6,
+        title: "Ergonomic Ultra-Light Wireless Mouse",
+        category: "Accessories",
+        price: 79.99,
+        stock: 30,
+        image: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800&auto=format&fit=crop&q=80",
+        description: "49g ultra-lightweight design, 26,000 DPI optical sensor, low latency 2.4GHz wireless connection."
+      }
+    ];
+
+    // State Application Variables
+    let products = JSON.parse(localStorage.getItem('tff_products')) || defaultProducts;
+    let cart = JSON.parse(localStorage.getItem('tff_cart')) || [];
+    let orders = JSON.parse(localStorage.getItem('tff_orders')) || [];
+    let settings = JSON.parse(localStorage.getItem('tff_settings')) || {
+      storeName: "TechForFree",
+      heroTitle: "Next-Gen Tech & High Performance PC Gear",
+      heroSubtitle: "Upgrade your rig with cutting-edge GPUs, mechanical keyboards, ultra-fast NVMe SSDs, and gaming monitors.",
+      promoCode: "TECH20",
+      promoDiscount: 20
+    };
+
+    let activeCategory = 'All';
+    let maxPrice = 3000;
+    let searchQuery = '';
+    let currentView = 'store'; // 'store' or 'admin'
+    let appliedDiscount = 0;
+
+    // Initialize Page
+    window.onload = function() {
+      applyStoreSettings();
+      renderProducts();
+      updateCartUI();
+      renderAdminDashboard();
+    };
+
+    function saveState() {
+      localStorage.setItem('tff_products', JSON.stringify(products));
+      localStorage.setItem('tff_cart', JSON.stringify(cart));
+      localStorage.setItem('tff_orders', JSON.stringify(orders));
+      localStorage.setItem('tff_settings', JSON.stringify(settings));
+    }
+
+    // View Switching
+    function switchView(view) {
+      currentView = view;
+      const storefrontView = document.getElementById('storefront-view');
+      const adminView = document.getElementById('admin-view');
+      const adminBtnText = document.getElementById('admin-toggle-text');
+      const modeBadge = document.getElementById('mode-badge');
+      const searchContainer = document.getElementById('nav-search-container');
+
+      if (view === 'admin') {
+        storefrontView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        adminBtnText.innerText = 'Exit Admin';
+        modeBadge.innerText = 'ADMIN CONTROL';
+        modeBadge.className = 'ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30';
+        searchContainer.classList.add('invisible');
+        renderAdminDashboard();
+      } else {
+        adminView.classList.add('hidden');
+        storefrontView.classList.remove('hidden');
+        adminBtnText.innerText = 'Admin Panel';
+        modeBadge.innerText = 'STOREFRONT';
+        modeBadge.className = 'ml-2 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20';
+        searchContainer.classList.remove('invisible');
+        renderProducts();
+      }
+    }
+
+    function toggleAdminView() {
+      switchView(currentView === 'store' ? 'admin' : 'store');
+    }
+
+    // Product Storefront Rendering & Filtering
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      const noProdMsg = document.getElementById('no-products-msg');
+      const sortValue = document.getElementById('sort-select').value;
+
+      let filtered = products.filter(p => {
+        const matchesCategory = activeCategory === 'All' || p.category === activeCategory;
+        const matchesPrice = p.price <= maxPrice;
+        const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              p.description.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesPrice && matchesSearch;
+      });
+
+      // Sort Products
+      if (sortValue === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+      else if (sortValue === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+      else if (sortValue === 'name') filtered.sort((a,b) => a.title.localeCompare(b.title));
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        noProdMsg.classList.remove('hidden');
+        return;
+      }
+
+      noProdMsg.classList.add('hidden');
+      grid.innerHTML = filtered.map(product => `
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-4 flex flex-col justify-between hover:border-brand-500/40 transition duration-300 hover:shadow-xl group">
+          <div>
+            <div class="relative overflow-hidden rounded-xl mb-4 bg-dark-bg h-48">
+              <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x400/111827/38bdf8?text=Tech+Product'">
+              <span class="absolute top-2 right-2 text-[10px] font-bold uppercase tracking-wider bg-dark-bg/80 backdrop-blur-md px-2.5 py-1 rounded-full text-brand-400 border border-dark-border">
+                ${product.category}
+              </span>
+            </div>
+            <h3 class="font-bold text-white text-base line-clamp-1 group-hover:text-brand-400 transition">${product.title}</h3>
+            <p class="text-gray-400 text-xs mt-1 line-clamp-2 leading-relaxed">${product.description}</p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-dark-border/60 flex items-center justify-between">
+            <div>
+              <span class="text-xs text-gray-500 block">Price</span>
+              <span class="text-lg font-extrabold text-white">$${product.price.toFixed(2)}</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="openProductModal(${product.id})" class="p-2.5 rounded-xl bg-dark-bg hover:bg-dark-hover border border-dark-border text-gray-300 hover:text-white transition" title="View Specs">
+                <i class="fa-solid fa-eye text-sm"></i>
+              </button>
+              <button onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''} class="px-3 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-black font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-brand-500/10 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-cart-plus"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterCategory(cat) {
+      activeCategory = cat;
+      const buttons = document.querySelectorAll('.cat-tab-btn');
+      buttons.forEach(btn => {
+        if (btn.innerText.trim() === cat || (cat === 'All' && btn.innerText.includes('All'))) {
+          btn.className = 'cat-tab-btn active font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-brand-500 text-black';
+        } else {
+          btn.className = 'cat-tab-btn font-semibold text-xs sm:text-sm px-4 py-2 rounded-xl whitespace-nowrap transition bg-dark-bg text-gray-300 hover:bg-dark-hover';
+        }
+      });
+      renderProducts();
+    }
+
+    function updatePriceFilter(val) {
+      maxPrice = parseFloat(val);
+      document.getElementById('price-range-val').innerText = `$${val}`;
+      renderProducts();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('search-input').value;
+      renderProducts();
+    }
+
+    function scrollToProducts() {
+      document.getElementById('catalog-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Shopping Cart Operations
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product || product.stock <= 0) return;
+
+      const existingItem = cart.find(item => item.id === productId);
+      if (existingItem) {
+        if (existingItem.qty < product.stock) {
+          existingItem.qty += 1;
+        } else {
+          showToast('Reached maximum available stock limit!');
+          return;
+        }
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+
+      saveState();
+      updateCartUI();
+      showToast(`Added ${product.title} to cart`);
+    }
+
+    function updateCartQty(productId, change) {
+      const item = cart.find(i => i.id === productId);
+      const product = products.find(p => p.id === productId);
+
+      if (item) {
+        item.qty += change;
+        if (item.qty <= 0) {
+          cart = cart.filter(i => i.id !== productId);
+        } else if (item.qty > product.stock) {
+          item.qty = product.stock;
+          showToast('Maximum stock available reached');
+        }
+      }
+      saveState();
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const container = document.getElementById('cart-items-container');
+      const badge = document.getElementById('cart-badge');
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      badge.innerText = totalCount;
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-gray-500">
+            <i class="fa-solid fa-cart-flatbed text-4xl mb-3"></i>
+            <p class="text-sm">Your shopping cart is empty.</p>
+          </div>
+        `;
+      } else {
+        container.innerHTML = cart.map(item => `
+          <div class="flex items-center justify-between bg-dark-bg p-3 rounded-xl border border-dark-border">
+            <div class="flex items-center gap-3">
+              <img src="${item.image}" alt="${item.title}" class="w-12 h-12 object-cover rounded-lg">
+              <div>
+                <h4 class="text-xs font-bold text-white line-clamp-1">${item.title}</h4>
+                <span class="text-xs text-brand-400 font-semibold">$${item.price.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="updateCartQty(${item.id}, -1)" class="w-6 h-6 rounded bg-dark-hover hover:bg-gray-800 text-white flex items-center justify-center text-xs">
+                -
+              </button>
+              <span class="text-xs font-bold text-white w-4 text-center">${item.qty}</span>
+              <button onclick="updateCartQty(${item.id}, 1)" class="w-6 h-6 rounded bg-dark-hover hover:bg-gray-800 text-white flex items-center justify-center text-xs">
+                +
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Calculations
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const discountVal = (subtotal * appliedDiscount) / 100;
+      const total = subtotal - discountVal;
+
+      document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+      document.getElementById('cart-discount').innerText = `-$${discountVal.toFixed(2)}`;
+      document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+
+      if (appliedDiscount > 0) {
+        document.getElementById('discount-row').classList.remove('hidden');
+      } else {
+        document.getElementById('discount-row').classList.add('hidden');
+      }
+    }
+
+    function toggleCartDrawer(open) {
+      const drawer = document.getElementById('cart-drawer');
+      if (open) {
+        drawer.classList.remove('invisible', 'opacity-0');
+      } else {
+        drawer.classList.add('invisible', 'opacity-0');
+      }
+    }
+
+    function applyPromoCode() {
+      const codeInput = document.getElementById('promo-input').value.trim().toUpperCase();
+      const statusMsg = document.getElementById('promo-status-msg');
+
+      if (codeInput === settings.promoCode) {
+        appliedDiscount = settings.promoDiscount;
+        statusMsg.innerText = `Promo code applied! ${settings.promoDiscount}% Discount`;
+        statusMsg.classList.remove('hidden', 'text-red-400');
+        statusMsg.classList.add('text-brand-400');
+      } else {
+        appliedDiscount = 0;
+        statusMsg.innerText = `Invalid promo code. Try: ${settings.promoCode}`;
+        statusMsg.classList.remove('hidden', 'text-brand-400');
+        statusMsg.classList.add('text-red-400');
+      }
+      updateCartUI();
+    }
+
+    function processCheckout() {
+      if (cart.length === 0) {
+        showToast('Cart is empty!');
+        return;
+      }
+
+      // Reduce product stock count
+      cart.forEach(cartItem => {
+        const prod = products.find(p => p.id === cartItem.id);
+        if (prod) {
+          prod.stock = Math.max(0, prod.stock - cartItem.qty);
+        }
+      });
+
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const total = subtotal - ((subtotal * appliedDiscount) / 100);
+      const newOrderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
+
+      const newOrder = {
+        id: newOrderId,
+        date: new Date().toLocaleDateString(),
+        customer: "Valued Customer",
+        items: [...cart],
+        total: total,
+        status: "Processing"
+      };
+
+      orders.unshift(newOrder);
+      cart = [];
+      appliedDiscount = 0;
+      
+      saveState();
+      updateCartUI();
+      toggleCartDrawer(false);
+
+      // Show Receipt Modal
+      document.getElementById('receipt-order-id').innerText = newOrderId;
+      document.getElementById('receipt-total').innerText = `$${total.toFixed(2)}`;
+      document.getElementById('receipt-modal').classList.remove('hidden');
+
+      renderProducts();
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receipt-modal').classList.add('hidden');
+    }
+
+    // Modals Handling
+    function openProductModal(id) {
+      const p = products.find(prod => prod.id === id);
+      if (!p) return;
+
+      document.getElementById('modal-product-img').src = p.image;
+      document.getElementById('modal-product-cat').innerText = p.category;
+      document.getElementById('modal-product-title').innerText = p.title;
+      document.getElementById('modal-product-desc').innerText = p.description;
+      document.getElementById('modal-product-price').innerText = `$${p.price.toFixed(2)}`;
+      
+      const stockEl = document.getElementById('modal-product-stock');
+      if (p.stock > 0) {
+        stockEl.innerText = `${p.stock} units left`;
+        stockEl.className = "text-sm font-semibold text-emerald-400";
+      } else {
+        stockEl.innerText = `Out of Stock`;
+        stockEl.className = "text-sm font-semibold text-red-400";
+      }
+
+      const addBtn = document.getElementById('modal-add-cart-btn');
+      addBtn.onclick = function() {
+        addToCart(p.id);
+        closeProductModal();
+      };
+
+      document.getElementById('product-modal').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').classList.add('hidden');
+    }
+
+    // Admin Dashboard Logic & Rendering
+    function renderAdminDashboard() {
+      // Calculate Statistics
+      const totalRev = orders.reduce((sum, ord) => sum + ord.total, 0);
+      const lowStockCount = products.filter(p => p.stock <= 5).length;
+
+      document.getElementById('stat-revenue').innerText = `$${totalRev.toFixed(2)}`;
+      document.getElementById('stat-orders').innerText = orders.length;
+      document.getElementById('stat-products').innerText = products.length;
+      document.getElementById('stat-low-stock').innerText = lowStockCount;
+
+      renderInventoryTable();
+      renderOrdersTable();
+    }
+
+    function switchAdminTab(tab) {
+      const tabs = ['inventory', 'orders', 'settings'];
+      tabs.forEach(t => {
+        document.getElementById(`admin-tab-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.className = "pb-3 font-bold text-sm text-gray-400 border-b-2 border-transparent hover:text-white";
+      });
+
+      document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      activeBtn.className = "pb-3 font-bold text-sm text-brand-400 border-b-2 border-brand-400";
+    }
+
+    function renderInventoryTable() {
+      const tbody = document.getElementById('inventory-table-body');
+      tbody.innerHTML = products.map(p => `
+        <tr class="hover:bg-dark-bg/50 transition">
+          <td class="p-4 flex items-center gap-3">
+            <img src="${p.image}" class="w-10 h-10 object-cover rounded-lg border border-dark-border">
+            <div>
+              <div class="font-bold text-white">${p.title}</div>
+              <div class="text-xs text-gray-500">ID: ${p.id}</div>
+            </div>
+          </td>
+          <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-dark-bg border border-dark-border">${p.category}</span></td>
+          <td class="p-4 font-bold text-brand-400">$${p.price.toFixed(2)}</td>
+          <td class="p-4">
+            <span class="font-semibold ${p.stock <= 5 ? 'text-amber-400' : 'text-emerald-400'}">${p.stock} units</span>
+          </td>
+          <td class="p-4 text-right space-x-2">
+            <button onclick="editProduct(${p.id})" class="p-2 bg-dark-bg hover:bg-dark-hover rounded-lg text-blue-400">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button onclick="deleteProduct(${p.id})" class="p-2 bg-dark-bg hover:bg-dark-hover rounded-lg text-red-400">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderOrdersTable() {
+      const tbody = document.getElementById('orders-table-body');
+      if (orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500">No orders recorded yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = orders.map(ord => `
+        <tr class="hover:bg-dark-bg/50 transition">
+          <td class="p-4 font-mono font-bold text-brand-400">${ord.id}</td>
+          <td class="p-4 font-medium text-white">${ord.customer}<br><span class="text-xs text-gray-500">${ord.date}</span></td>
+          <td class="p-4 text-xs text-gray-300">${ord.items.map(i => `${i.qty}x ${i.title}`).join(', ')}</td>
+          <td class="p-4 font-bold text-white">$${ord.total.toFixed(2)}</td>
+          <td class="p-4">
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${ord.status === 'Shipped' ? 'bg-blue-500/20 text-blue-400' : ord.status === 'Delivered' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+              ${ord.status}
+            </span>
+          </td>
+          <td class="p-4 text-right">
+            <select onchange="updateOrderStatus('${ord.id}', this.value)" class="bg-dark-bg border border-dark-border text-xs rounded-lg p-1.5 text-gray-200">
+              <option value="Processing" ${ord.status === 'Processing' ? 'selected' : ''}>Processing</option>
+              <option value="Shipped" ${ord.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+              <option value="Delivered" ${ord.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function updateOrderStatus(orderId, status) {
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        order.status = status;
+        saveState();
+        renderAdminDashboard();
+        showToast(`Order ${orderId} status set to ${status}`);
+      }
+    }
+
+    // Product Admin Form Operations
+    function openProductModal(editId = null) {
+      const modal = document.getElementById('admin-product-modal');
+      const form = document.getElementById('product-form');
+      const title = document.getElementById('admin-modal-title');
+
+      if (editId) {
+        title.innerText = "Edit Product";
+        const prod = products.find(p => p.id === editId);
+        document.getElementById('form-product-id').value = prod.id;
+        document.getElementById('form-title').value = prod.title;
+        document.getElementById('form-category').value = prod.category;
+        document.getElementById('form-price').value = prod.price;
+        document.getElementById('form-stock').value = prod.stock;
+        document.getElementById('form-image').value = prod.image;
+        document.getElementById('form-desc').value = prod.description;
+      } else {
+        title.innerText = "Add New Product";
+        form.reset();
+        document.getElementById('form-product-id').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAdminProductModal() {
+      document.getElementById('admin-product-modal').classList.add('hidden');
+    }
+
+    function handleProductFormSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('form-product-id').value;
+      const title = document.getElementById('form-title').value;
+      const category = document.getElementById('form-category').value;
+      const price = parseFloat(document.getElementById('form-price').value);
+      const stock = parseInt(document.getElementById('form-stock').value);
+      const image = document.getElementById('form-image').value;
+      const description = document.getElementById('form-desc').value;
+
+      if (id) {
+        // Edit Existing
+        const prod = products.find(p => p.id == id);
+        if (prod) {
+          prod.title = title;
+          prod.category = category;
+          prod.price = price;
+          prod.stock = stock;
+          prod.image = image;
+          prod.description = description;
+        }
+      } else {
+        // Add New
+        const newProd = {
+          id: Date.now(),
+          title,
+          category,
+          price,
+          stock,
+          image,
+          description
+        };
+        products.push(newProd);
+      }
+
+      saveState();
+      closeAdminProductModal();
+      renderAdminDashboard();
+      showToast('Product saved successfully!');
+    }
+
+    function editProduct(id) {
+      openProductModal(id);
+    }
+
+    function deleteProduct(id) {
+      if (confirm('Are you sure you want to remove this product from inventory?')) {
+        products = products.filter(p => p.id !== id);
+        saveState();
+        renderAdminDashboard();
+        showToast('Product deleted!');
+      }
+    }
+
+    // Save Live Branding Settings
+    function saveStoreSettings() {
+      settings.storeName = document.getElementById('setting-store-name').value;
+      settings.heroTitle = document.getElementById('setting-hero-title').value;
+      settings.heroSubtitle = document.getElementById('setting-hero-subtitle').value;
+      settings.promoCode = document.getElementById('setting-promo-code').value.toUpperCase();
+      settings.promoDiscount = parseInt(document.getElementById('setting-promo-discount').value) || 10;
+
+      saveState();
+      applyStoreSettings();
+      showToast('Store settings updated successfully!');
+    }
+
+    function applyStoreSettings() {
+      document.getElementById('header-store-name').innerHTML = `${settings.storeName}<span class="text-brand-400">.</span>`;
+      document.getElementById('banner-hero-title').innerText = settings.heroTitle;
+      document.getElementById('banner-hero-subtitle').innerText = settings.heroSubtitle;
+
+      document.getElementById('setting-store-name').value = settings.storeName;
+      document.getElementById('setting-hero-title').value = settings.heroTitle;
+      document.getElementById('setting-hero-subtitle').value = settings.heroSubtitle;
+      document.getElementById('setting-promo-code').value = settings.promoCode;
+      document.getElementById('setting-promo-discount').value = settings.promoDiscount;
+    }
+
+    function resetDefaultData() {
+      if (confirm('Reset catalog, settings, and orders back to initial demo state?')) {
+        localStorage.clear();
+        products = [...defaultProducts];
+        cart = [];
+        orders = [];
+        settings = {
+          storeName: "TechForFree",
+          heroTitle: "Next-Gen Tech & High Performance PC Gear",
+          heroSubtitle: "Upgrade your rig with cutting-edge GPUs, mechanical keyboards, ultra-fast NVMe SSDs, and gaming monitors.",
+          promoCode: "TECH20",
+          promoDiscount: 20
+        };
+        saveState();
+        applyStoreSettings();
+        renderAdminDashboard();
+        renderProducts();
+        updateCartUI();
+        showToast('Reset back to default demo data!');
+      }
+    }
+
+    // Toast Utility
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notification');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
